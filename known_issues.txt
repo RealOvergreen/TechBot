@@ -1,0 +1,6 @@
+These are all known issues with TechBot at the moment.
+
+1 - Member joining messages
+Problem: Due to the way TechBot is coded, any member join messages can only be sent to a single channel at the moment, and not a channel in the server they joined (unless the server they joined has the channel where those messages are sent, of course).
+Workarounds (TechBot): Changed join messages from #testing in TechBot Development to #server-join in TechBot Development.
+Workarounds you can do: There is no better fix for this unless the code is changed.
