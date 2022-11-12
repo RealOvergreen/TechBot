@@ -18,9 +18,9 @@ async def on_ready():
 @client.event
 async def on_member_join(member):
     print(f'{member} has joined {member.guild.name}!')
-    channel = client.get_channel(1035733930810282082)
+    channel = client.get_channel(1041101362647273482)
 
-    await channel.send(f'{member.mention} has joined **{member.guild.name}**! Welcome!')
+    await channel.send(f'{member.mention} has joined **{member.guild.name}**.')
 
 @client.event
 async def on_member_remove(member):
@@ -33,8 +33,10 @@ async def on_command_error(ctx, error):
 
 @client.event
 async def on_command_error(ctx, error):
-    await ctx.send('Oops! That command doesn\'t exist. Type tb!help for a list of commands.')
-
+    if isinstance(error, commands.CommandNotFound):
+        await ctx.send("Oops! That command doesn't exist. Type tb!help for a list of commands.")
+    await ctx.send(f"Oops! An error occurred: {str(error)}.")
+    
 @tasks.loop(seconds=7826)
 async def change_status():
     await client.change_presence(activity=discord.Game(next(status)))
