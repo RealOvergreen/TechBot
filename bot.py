@@ -6,21 +6,24 @@ from itertools import cycle
 
 intents = discord.Intents.all()
 
-client = commands.Bot(command_prefix = 'tb!', intents = intents)
-status = cycle(['the album Taylor Swift','the album Fearless (Taylor\'s Version)', 'the album Speak Now', 'the album Red (Taylor\'s Version)', 'the album 1989', 'the album reputation', 'the album Lover', 'the album folklore', 'the album evermore', 'the album Midnights'])
+client = commands.Bot(command_prefix = 'tb!', intents = intents, help_command=None)
+client.remove_command=('help')
+
+class help2(commands.MinimalHelpCommand):
+    async def send_pages(self):
+        destination = self.get_destination()
+        e = discord.Embed(color=0x006dff, description='')
+        for page in self.paginator.pages:
+            e.description += page
+        await destination.send(embed=e)
+
+client.help_command = help2()
 
 @client.event
 async def on_ready():
     await client.change_presence(status=discord.Status.idle)
-    change_status.start()
+    await client.change_presence(activity=discord.Activity(type=discord.ActivityType.listening, name="Lovejoy"))    
     print('Hi.\nTechBot is ready to use!')
-
-@client.event
-async def on_member_join(member):
-    print(f'{member} has joined {member.guild.name}!')
-    channel = client.get_channel(1041101362647273482)
-
-    await channel.send(f'{member.mention} has joined **{member.guild.name}**.')
 
 @client.event
 async def on_member_remove(member):
@@ -36,16 +39,13 @@ async def on_command_error(ctx, error):
     if isinstance(error, commands.CommandNotFound):
         await ctx.send("Oops! That command doesn't exist. Type tb!help for a list of commands.")
     await ctx.send(f"Oops! An error occurred: {str(error)}.")
-    
-@tasks.loop(seconds=7826)
-async def change_status():
-    await client.change_presence(activity=discord.Game(next(status)))
 
-@client.command()
+
+@client.command(brief='Shows the latency of the bot.', description='Shows the latency of the bot from when you sent your message to when the bot responds.')
 async def ping(ctx):
     await ctx.send(f'Pong! {round(client.latency * 1000)} ms')
 
-@client.command(aliases=['8ball'])
+@client.command(aliases=['8ball'], brief='Ask a question, and get a response from the 8 ball. 🎱', description='Ask a question, and get a response from the 8 ball. 🎱')
 async def magic8ball(ctx, *, question=''):
     responses = ["It is certain.",
                 "It is decidedly so.",
@@ -74,51 +74,22 @@ async def magic8ball(ctx, *, question=''):
                 "Obviously... no.",
                 "Try again.",]
     if question is '':
-        await ctx.send(f'You need to ask the 8 ball a question to use it!')
+        await ctx.send(f'🎱 You need to ask the 8 ball a question to use it!')
     else:
         await ctx.send(f'Question: {question}\nAnswer: {random.choice(responses)}')
 
-@client.command(aliases=['repeat'])
-async def echo(ctx, *, echotext=''):
-    if echotext is '':
-        await ctx.send(f'Please enter text that can be echoed.')
-    else:
-        await ctx.send(echotext)
-
-@client.command(aliases=['yesorno'])
-async def yesno(ctx):
-    await ctx.send(random.choice(['yes', 'no']))
-
-@client.command(aliases=['flipacoin', 'flipcoin'])
-async def coin(ctx):
-    await ctx.send(random.choice(['Heads.', 'Tails.']))
-
-@client.command()
-async def sleep(ctx):
-    await ctx.send(random.choice(['😴', '💤']))
-
-@client.command()
-async def nothing(ctx):
-    await ctx.send(f' ')
-
-@client.command(aliases=['cls'])
-@commands.has_permissions(manage_messages=True)
-async def clear(ctx, amount=100):
-    await ctx.channel.purge(limit=amount)
-    await ctx.send(f'Cleared 100 messages from this channel.')
-
-@client.command()
+@client.command(brief='Kicks a member from the server.', description='TechBot will kick the member provided from the server. You must have moderation powers to run this command.')
 @commands.has_permissions(kick_members=True)
 async def kick(ctx, member : discord.Member, *, reason='No reason provided'):
-    await member.kick(reason=reason)
+        await member.kick(reason=reason)
 
-@client.command()
+@client.command(brief='Bans a member from the server.', description='TechBot will ban the member provided from the server. You must have moderation powers to run this command.')
 @commands.has_permissions(ban_members=True)
 async def ban(ctx, member : discord.Member, *, reason='No reason provided'):
     await member.ban(reason=reason)
     await ctx.send(f'{member.mention} was banned.')
 
-@client.command()
+@client.command(brief='Unbans a banned member from the server.', description='TechBot will unban a member that was previously banned from the server. You must have moderation powers to run this command.')
 @commands.has_permissions(ban_members=True)
 async def unban(ctx, *, member):
     banned_users = await ctx.guild.bans()
@@ -132,4 +103,46 @@ async def unban(ctx, *, member):
             await ctx.send(f'Successfully unbanned {user.mention}.')
             return
 
+@client.command(brief='Receive a random color and a hex code for it.', description='TechBot will send an embed with a randomly picked color and the hex code for that color.')
+async def color(ctx):
+    r = random.randint(100000, 999999)
+    e = discord.Embed(title='Random Color :rainbow:', description = f'0x{r}', color=r)
+    await ctx.send(embed=e)
+
+@client.command(brief='Receive a random number.', description='TechBot will send an embed with random number.')
+async def number(ctx):
+    e = discord.Embed(title='Random Number :1234:', description = (random.randint(1, 9999)), color = random.randint(100000, 999999))
+    await ctx.send(embed=e) 
+
+
+@client.command(aliases=['repeat'], brief='Repeats the text you sent.', description='Send some text to TechBot, and it will be repeated.')
+async def echo(ctx, *, echotext=''):
+    if echotext is '':
+        await ctx.send(f'Please enter text that can be echoed.')
+    else:
+        await ctx.send(echotext)
+
+@client.command(aliases=['yesorno'], brief='Get an answer of yes or no.', description='TechBot will tell you yes or no.')
+async def yesno(ctx):
+    await ctx.send(random.choice(['yes', 'no']))
+
+@client.command(aliases=['flipacoin', 'flipcoin'], brief='A simple coin flip; you get either heads or tails.', description='TechBot flips a coin, and gives you the result of heads or tails.')
+async def coin(ctx):
+    await ctx.send(random.choice(['Heads.', 'Tails.']))
+
+@client.command(brief='😴', description='TechBot sends an emoji that resembles what we should probably all get...')
+async def sleep(ctx):
+    await ctx.send(random.choice(['😴', '💤']))
+
+@client.command(brief='...', description='TechBot will send... nothing. All there is to it.')
+async def nothing(ctx):
+    await ctx.send(f'_ _')
+
+@client.command(aliases=['cls'], brief='Clears messages from the channel.', description='TechBot will clear messages from the channel the message was sent in.')
+@commands.has_permissions(manage_messages=True)
+async def clear(ctx, amount=1000):
+    await ctx.channel.purge(limit=amount)
+    await ctx.send(f'Cleared {(amount)} messages from this channel.')
+
+# Enter your token between the apostrophes here.
 client.run('')
