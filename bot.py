@@ -22,7 +22,7 @@ client.help_command = help2()
 @client.event
 async def on_ready():
     await client.change_presence(status=discord.Status.idle)
-    await client.change_presence(activity=discord.Activity(type=discord.ActivityType.listening, name="Lovejoy"))    
+    await client.change_presence(activity=discord.CustomActivity(name='New command! tb!tsoc' ,emoji='👨🏻‍💻'))    
     print('Hi.\nTechBot is ready to use!')
 
 @client.event
@@ -137,6 +137,11 @@ async def sleep(ctx):
 @client.command(brief='...', description='TechBot will send... nothing. All there is to it.')
 async def nothing(ctx):
     await ctx.send(f'_ _')
+
+@client.command(aliases=['tsoc', 'thescriptofchance', 'tsoc-3', 'tsoc3'], brief='Simulates Julia\'s The Script of Chance.', description='TechBot will send the output of a random command run by The Script of Chance.')
+async def scriptofchance(ctx):
+    display_name = ctx.author.display_name
+    await ctx.send(random.choice(['```Not all pee pee time is poo poo time, but poo poo time is pee pee time.```', '```Every day is a new day, just know this if you are having a really bad day.```', '```The way you see the world means everything.```', '```Be nothing but yourself, that is what matters the most.```', '```Just know, by running this crazy script you are living dangerously, be careful!```', '```Always live life to the fullest.```', '```You are an amazing person, I really hope you have a great day!```', '```Always stay positive, even negative situations have their positives!```', '```Do not stay up too late, you always have the next day to complete things, sleep is important!```', '```Look at this!``` https://picsum.photos/200/300', '```Time to check or restart for updates! You know, they are important for security...```', '```Uh oh! Looks like you have an issue that needs your attention!```', '```What\'s explorer again?```']))
 
 @client.command(aliases=['cls'], brief='Clears messages from the channel.', description='TechBot will clear messages from the channel the message was sent in.')
 @commands.has_permissions(manage_messages=True)
